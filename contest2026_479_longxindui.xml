@@ -5,12 +5,39 @@
     (openvela.xml in this same repo) and adds this team repo as a self-ref
     project, exposing its work-form subdirectories to openvela working-tree
     locations via <linkfile>. remote/default come from the included openvela.xml.
+    
+         本队（479 龙芯队）改动：
+         
+    nuttx:
+        +arch/loongarch/
+        +boards/loongarch/
+         	修改libs/libxx/libcxx/libcxx/src/atomic.cpp
+    
+    apps:
+    	+examples/ls_driver_test/
+    	+system/ls2k0300_power/
+    	
+    vendor:
+    	+loongson/
+         
+          本仓库其余不需要的软连接均已删除，详细改动见README.md
+          
   -->
+  <remote name="my_github" fetch="https://github.com/lingluan9/" />
   <include name="openvela.xml"/>
 
   <project path="contest2026_479_longxindui" name="contest2026_479_longxindui">
-    <linkfile src="app/hello_app" dest="packages/demos/contest2026_479_hello_app"/>
-    <linkfile src="quickapp/hello_quickapp" dest="packages/apps/contest2026_479_hello_quickapp"/>
-    <linkfile src="board/contest_board" dest="vendor/openvela/boards/contest2026_479_board"/>
   </project>
+  
+  <remove-project name="nuttx" />
+  <project path="nuttx" name="nuttx" remote="my_github" revision="dev-ls" />
+  
+  <remove-project name="nuttx_libs_libxx_libcxx" />
+  <project path="nuttx/libs/libxx/libcxx/libcxx" name="nuttx_libs_libxx_libcxx" remote="my_github" revision="dev-ls" />
+  
+  <remove-project name="nuttx-apps" />
+  <project path="apps" name="nuttx-apps" remote="my_github" revision="dev-ls" />
+  
+  <remove-project name="vendor" />
+  <project path="vendor" name="vendor" remote="my_github" revision="dev-ls" />
 </manifest>
