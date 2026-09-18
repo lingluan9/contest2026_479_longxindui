@@ -1,36 +1,73 @@
-# contest2026_479_longxindui
+# 龙芯 2K0300 的 OpenVela 系统移植与外设驱动验证
 
-👋 欢迎参加 **2026 首届 openvela AI 硬件开发者大赛**！
+> 2026 首届 openvela AI 硬件开发者大赛 ｜ 队伍编号 **479** ｜ 队伍名称 **longxindui**
 
-这是组委会为你的队伍创建的**专属参赛仓库**（本仓为样例/模板，队伍编号 `479`；你看到的将是你自己的 `contest2026_<编号>_<队伍名>`）。比赛期间，你的全部参赛代码、打包产物与 AI Coding 日志都提交到这里。
+## 〇、公共仓库改动与 Fork
 
-> 本仓既是「代码仓」，又内置了一键拉取整套 openvela 工程的 `repo` 清单（manifest）。你只需跟它打交道，**自始至终只动一个文件夹**。
+本作品涉及对 openvela **公共仓库**的改动（新增 LoongArch 架构支持等），按大赛规则 fork 后在各自仓库提交 PR。共改动 4 个公共仓库，fork 地址如下（均基于 `dev-ls` 分支开发）：
 
----
+| 公共仓库 | 本队 Fork 地址 | 主要改动 |
+|---|---|---|
+| `nuttx` | https://github.com/lingluan9/nuttx | 新增 `arch/loongarch/`、`boards/loongarch/`、`libs/libc/machine/loongarch/` |
+| `nuttx-apps` | https://github.com/lingluan9/nuttx-apps | 新增 `examples/ls_driver_test/`、`system/ls2k0300_power/` |
+| `vendor` | https://github.com/lingluan9/vendor | 新增 `loongson/` 编译脚本 |
+| `nuttx_libs_libxx_libcxx` | https://github.com/lingluan9/nuttx_libs_libxx_libcxx | 修复 libcxx 原子操作 |
 
-## 一、先读这些官方文档
+各仓库的具体替换配置与改动清单见本仓 `contest2026_479_longxindui.xml`。
 
-**通用（所有赛道必读）：**
+## 一、作品简介
 
-| 文档                                                                                                                                     | 用途                                           |
-| ---------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| [《大赛总览》](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/contest_overview.md)                        | 赛道、流程、评分、资源，建议先通读             |
-| [《参赛代码提交指南》](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/code_submission_guide.md)           | 仓库获取、提交流程、时间与权限（**以此为准**） |
-| [《AI Coding 日志归集与提交手册》](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/ai_coding_log_guide.md) | 如何导出 AI 对话日志并提交到 `logs/`           |
+本作品将 **OpenVela（NuttX RTOS）** 完整移植到**龙芯 LoongArch 架构 2K0300 处理器**（LOONG-HAT 开发板 + 扩展板）上，并交付一套覆盖全部常用外设的驱动测试套件 `ls_driver_test`。
 
-**按你的赛道选读（三选一）：**
+**要解决的问题**：OpenVela 此前不支持 LoongArch 架构，本作品为其补齐了 LoongArch 的内核架构支持、板级支持包（BSP）与片上/板载外设驱动，让 OpenVela 可以在国产龙芯处理器上运行，并通过可复现的测试用例逐项验证驱动正确性。
 
-| 赛道                  | 教程导航                                                                                                                                                 |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 快应用 / 手表应用创新 | [快应用教程导航](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/quickapp/quickapp_guide_index.md)                         |
-| AI 硬件产品创新       | [AI 硬件赛道教程导航](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/ai_hardware/ai_hardware_guide_index.md)              |
-| 新硬件适配            | [新硬件适配赛道教程导航](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/hardware_porting/hardware_porting_guide_index.md) |
+**亮点**：
 
----
+- **全新架构移植**：在 NuttX 中新增 `arch/loongarch/`、`boards/loongarch/` 与 `libc/machine/loongarch/` 支持，修复 libcxx 原子操作，从零完成 2K0300 的启动、串口与最小系统移植，可从uboot启动系统。
+- **外设驱动全覆盖**：测试套件覆盖 GPIO（LED/按键/蜂鸣器）、硬件 PWM（呼吸灯）、硬件 UART、硬件 SPI（ADC、SPI Flash）、I2C（OLED、光照传感器、EEPROM）以及 Thermal/Watchdog/RTC 等共 13 项测试。
+- **系统级测试通过**：cmocka 内存管理等 openvela 通用测试在真机全部通过，结果与串口日志见 `evidence/`。
+- **经验沉淀为 Skill**：开发中踩坑沉淀为自建 Skill `skills/loongarch-2k300-openvela-driver/`，包含各外设驱动模板、引脚表、寄存器表与自动检查脚本。
+- **提供预编译产物**：`prebuilt/nuttx.bin` 可直接烧录验证。
 
-## 二、第一步：拉取完整工程
+## 二、选题方向
 
-用组委会提供的命令一键拉取「openvela 全量源码 + 你的专属仓」：
+**新硬件适配**。
+
+理由：本作品的核心是为 openvela 补齐一个此前不支持的处理器架构（LoongArch 2K0300）——从内核架构移植、板级 BSP 到外设驱动逐层打通，正是"新硬件适配"赛道的目标场景。
+
+## 三、目录结构
+
+本仓是 manifest 仓：`repo sync` 后，`nuttx/`、`apps/`、`vendor/` 会按 `contest2026_479_longxindui.xml` 的配置替换为本队的 fork（`dev-ls` 分支），**作品代码全部位于这三个仓库内**：
+
+| 位置 | 内容 |
+|---|---|
+| `nuttx/arch/loongarch/`、`nuttx/boards/loongarch/` | LoongArch 架构支持与 2K0300 板级支持包 |
+| `nuttx/libs/libc/machine/loongarch/` | LoongArch libc 机器相关实现 |
+| `apps/examples/ls_driver_test/` | 外设驱动测试套件（详见 `docs/驱动测试说明.md`） |
+| `apps/system/ls2k0300_power/` | 2K0300 电源管理 |
+| `vendor/loongson/` | 龙芯编译脚本（`help.sh` / `set_env.sh`） |
+
+本仓各目录：
+
+```text
+contest2026_479_longxindui/
+├── contest2026_479_longxindui.xml   本仓 manifest（fork 替换 + 工具链说明）
+├── openvela.xml                     openvela 基础工程 manifest
+├── prebuilt/
+│   └── nuttx.bin                              预编译固件（可直接烧录验证）
+├── docs/                            技术报告、烧录方法（含截图）、原理图、引脚复用图、用户手册
+├── evidence/                        真机照片、真机视频与 openvela 通用测试结果
+├── skills/loongarch-2k300-openvela-driver/    自建驱动开发 Skill（模板/引脚表/检查脚本）
+├── logs/                            AI Coding 对话日志（组委会要求格式）
+├── 驱动测试说明.md                   测试套件逐项说明（原理/引脚/现象）
+└── ls2k0300编译方法.md               编译环境与步骤简明版
+```
+
+## 四、运行方式
+
+实测环境：Ubuntu 22.04。
+
+### 4.1 获取工程
 
 ```bash
 repo init -u https://github.com/open-vela/contest2026_479_longxindui \
@@ -38,111 +75,82 @@ repo init -u https://github.com/open-vela/contest2026_479_longxindui \
 repo sync -c -j8
 ```
 
-同步后，你的整个仓库位于工作区的 `contest2026_479_longxindui/`，openvela 全量源码在外层（`nuttx/`、`apps/`、`packages/`、`vendor/` 等）。
+同步后本仓位于工作区 `contest2026_479_longxindui/`，openvela 全量源码在外层（`nuttx/`、`apps/`、`vendor/` 等，已被 manifest 替换为本队 fork）。以下命令均在外层工作区执行。
 
----
+### 4.2 部署龙芯工具链
 
-## 三、第二步：在哪里写代码
-
-**只在自己的仓目录 `contest2026_479_longxindui/` 里开发。** 不同作品形态放在对应子目录，manifest 会通过 `<linkfile>` 把它们**软链**到 openvela 编译树该在的位置——你不用手动 copy：
-
-| 作品形态 | 你的代码放这里             | 系统自动映射到                                 |
-| -------- | -------------------------- | ---------------------------------------------- |
-| 应用     | `app/hello_app/`           | `packages/demos/contest2026_479_hello_app`     |
-| 快应用   | `quickapp/hello_quickapp/` | `packages/apps/contest2026_479_hello_quickapp` |
-| 板级适配 | `board/contest_board/`     | `vendor/openvela/boards/contest2026_479_board` |
-
-> 用不到的形态目录可以删掉；新增作品时按同样规则加子目录，并在 `contest2026_479_longxindui.xml` 里补一条 `<linkfile>` 映射即可。**生产仓库（packages/nuttx/vendor 等）零改动。**
-
-建议仓库目录约定（便于评委定位）：
-
-```text
-app/ | quickapp/ | board/   # 你的作品代码
-logs/                       # AI Coding 日志（主动导出后提交，格式见 logs/README.md）
-README.md                   # 作品说明（提交前请改成你自己的，见第六节）
-```
-
-> 仓内附带了一个 `.gitignore.example`，给出了**编译产物**等不需要进仓的文件示例。如需启用，`cp .gitignore.example .gitignore` 后按需增删即可。**注意 `logs/` 下最终导出的 AI Coding 日志必须提交，不要忽略。**
->
-> `logs/` 的目录结构与提交格式见 [logs/README.md](logs/README.md)。
-
----
-
-## 四、第三步：编译与运行
-
-编译/运行步骤随作品形态不同而不同，请参考你所在赛道的教程导航：
-
-- 快应用 / 手表应用：[快应用教程导航](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/quickapp/quickapp_guide_index.md)（含模拟器与开发板部署）。
-- AI 硬件产品创新：[AI 硬件赛道教程导航](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/ai_hardware/ai_hardware_guide_index.md)（环境搭建、编译烧录、Skill 开发）。
-- 新硬件适配：[新硬件适配赛道教程导航](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/hardware_porting/hardware_porting_guide_index.md)（BSP 移植、最小 NSH 基线）。
-
-子目录已通过 manifest 中的 `<linkfile>` 软链进 openvela 编译树，因此构建在 openvela 工作区**根目录**（即你这个仓的上一级）进行。openvela 使用 `build.sh` 作为统一入口，接收一个 **board config 路径**作为参数：
+交叉编译工具链体积过大，无法随 git 仓库提交，请从龙芯官方源下载后解压（在 openvela 工作区根目录执行）：
 
 ```bash
-# 进入 openvela 工作区根目录（你的仓的上一级）
-cd ..
-
-# 通用语法：第一个参数是 board config 路径，第二个参数可以是 menuconfig / distclean 等
-./build.sh <board-config-path> [menuconfig|distclean] [-j8]
+$ wget https://gitee.com/open-loongarch/cross-toolchain/raw/master/gcc-13/loongarch64-linux-gnu-gcc13.3.tar.xz
+$ sudo tar xf loongarch64-linux-gnu-gcc13.3.tar.xz  -C /opt
 ```
 
-> 具体的 board config 路径、目标产物、模拟器/真机部署方式请以你所在赛道的教程导航为准。本仓 `app/` `quickapp/` `board/` 三个示例骨架对应的 Kconfig 选项可通过 `menuconfig` 启用。
+再复制编译脚本：
 
----
+```bash
+cp vendor/loongson/help.sh .
+cp vendor/loongson/set_env.sh .
+```
 
-## 五、第四步：提交作品
+### 4.3 编译
 
-1. **fork** 你的专属仓 → 开发 → `git commit` 并推送 → 向专属仓发起 **Pull Request**，可**自行 review 并合入**（无需等组委会）。
-2. **AI Coding 日志**：与 AI 工具的对话会自动记录到本机 staging（不会自动上传），需你**主动导出/打包**选定会话到仓内 `logs/` 目录后一并提交。详见[《AI Coding 日志归集与提交手册》](https://github.com/open-vela/docs/blob/dev-ai-contest-2026/zh-cn/contest_2026/ai_coding_log_guide.md)。
-3. 若需改动 **nuttx 等公共仓库**，不在本仓改，而是 fork 对应公共仓、以 PR 提交到 `dev-ai-contest-2026` 分支，由组委会 review 后合入。
+```bash
+./help.sh
+```
 
-> ⏰ **提交作品截止：9 月 20 日**。截止后统一收回 push 权限，仍可查看 / clone。
->
-> 获奖后再按要求将作品 PR 至 openvela 上游对应仓库（走标准 PR + CI 流程）。
+编译产物 `nuttx.bin` 生成在 `cmake_out/hummingbird-ls2k0300_nsh/` 下。
 
-### 关于 PR 与 CLA
+### 4.4 烧录与部署
 
-- 本仓所有改动通过 **Pull Request** 合入（分支保护强制，可自行合入自己的 PR）。
-- 首次贡献需在[**官网签署 CLA**](https://openvela.com/#/community/cla)；PR 上会自动跑 `cla/signature` 检查，在官网签署成功后，在 PR 评论 `/check-cla` 复检即可通过。
+烧录与部署步骤**配有完整截图**，请对照 `docs/2k0300烧录openvela方法.pdf`（同名 `.docx` 一并附上）逐步操作即可。烧录完成后，用串口终端连接板卡即可进入 nsh 命令行（波特率参数见烧录文档）。
 
----
+> 不想本地编译的话，可直接使用本仓 `prebuilt/nuttx.bin`（预编译产物）按上述文档烧录。
 
-## 六、提交前：把本 README 改成你的作品说明
+### 4.5 驱动测试运行
 
-本文件目前是组委会给的**使用说明书**。**作品提交前，请把它替换成你自己作品的说明**，方便评委快速了解你做了什么、怎么跑起来。建议至少包含以下内容：
+在板卡 nsh 串口终端下执行测试程序 `ls_driver_test`：
 
-```markdown
-# <你的作品名>
+```bash
+# 单项测试
+ls_driver_test <选项>
+ls_driver_test -h    # 查看帮助
+```
 
-## 一、作品简介
-<一句话/一段话说明这个作品是什么、解决什么问题、亮点在哪>
+支持的子命令一览：
 
-## 二、选题方向
-<快应用 / 手表应用创新 ｜ AI 硬件产品创新 ｜ 新硬件适配 ｜ 自定方向，并简述理由>
+| 选项 | 说明 | 所需外设 |
+|------|------|----------|
+| `led` | LED 闪烁（GPIO72/73，低电平点亮） | 板载 LED |
+| `key` | 按键 + LED（KEY1/KEY2 翻转红/绿灯，30 秒） | 按键 |
+| `oled` | SSD1306 OLED 显示（I2C1，0x3C） | OLED 屏 |
+| `thermal` | 片上温度传感器 | — |
+| `pwm` | PWM2 呼吸灯（GPIO88） | 板载蓝 LED |
+| `watchdog` | 看门狗定时器 | — |
+| `rtc` | 实时时钟 | — |
+| `adc` | MCP3204 ADC 读取（SPI2） | MCP3204 模块 |
+| `sensor` | BH1750 光照 + OLED 显示 | BH1750 + OLED |
+| `eeprom` | EEPROM 存储光照数据（按键控制） | AT24C02 + BH1750 |
+| `buzzer` | 蜂鸣器 + 按键控制 | 蜂鸣器 |
+| `spiflash` | SPI Flash 存储光照数据（按键控制） | SPI Flash + BH1750 |
+| `uart2` | UART2 回显（TX=GPIO44 / RX=GPIO45） | 串口线 |
 
-## 三、目录结构
-<列出你这个仓里各目录/文件的作用，例如：>
-- `app/xxx/`        — <说明>
-- `board/xxx/`      — <说明>
-- `quickapp/xxx/`   — <说明>
-- `logs/`           — AI Coding 日志
-- `docs/` 或其他    — <说明>
+> 注意：`sensor`、`eeprom`、`buzzer`、`spiflash`、`uart2` 五项需要交互（按键/外接设备），不在默认序列中，必须显式传子命令运行。
 
-## 四、运行方式
-<拉取工程后，如何编译、烧录/部署、运行的完整步骤；最好能让评委照着一步步复现>
+每项测试的**工作原理、引脚连接、串口打印与预期现象**，逐项详见 `docs/驱动测试说明.md`；外设接线引脚与扩展板接口对照 `docs/2k0300引脚复用图.png` 与 `docs/ls2k0300loong-hat扩展板原理图.pdf`。
+
+### 4.6 openvela 通用测试
+
+除驱动测试外，本作品还通过了 openvela 通用系统测试（cmocka 内存管理等），指令、配置与完整串口日志见 `evidence/ls2k300 openvela通用测试结果.md`。
 
 ## 五、AI Coding 使用说明
-<说明本作品如何借助 AI 辅助开发：
-- 在需求拆解 / 方案设计 / 编码 / 调试 / 文档等环节如何与 AI 协作；
-- AI 对开发效率或质量带来的实际帮助。
-完整对话日志见 logs/ 目录>
-```
 
-> 提示：将会根据「作品本身 + 你的 README 说明 + `logs/` 里的 AI Coding 日志」来理解和评估你的作品，README 写清楚很重要。
+本作品从架构移植调研、驱动编写到真机调试，全程与 AI 结对完成：
 
----
+- **需求拆解与方案设计**：与 AI 梳理 LoongArch 架构在 NuttX 中的接入点（arch / boards / libc 三层），规划 2K0300 外设的驱动模式（VFS 设备节点 + pinctrl 复用）。
+- **编码**：测试套件各外设驱动由 AI 按"模板 → 填引脚/寄存器 → 调试"的方式生成，配合龙芯用户手册与扩展板原理图核对寄存器地址与时序。
+- **调试**：AI 直接分析串口日志与栈回溯定位问题（如 SPI DR 寄存器位宽、EOT 等待、pinctrl 二次覆盖引脚配置等平台特有陷阱）。
+- **经验固化**：AI 将踩坑沉淀为自建 Skill `skills/loongarch-2k300-openvela-driver/`——含各外设完整驱动模板、硬件规格表、Kconfig 依赖表与自动检查脚本，后续同类驱动可直接复用。
+- **文档**：技术报告（`docs/龙芯2K0300的openvela系统移植-技术报告.pdf`）与本 README 均由 AI 依据开发记录整理生成。
 
-## 附：仓库命名规范
-
-`contest2026_<编号>_<队伍名>` — 编号三位零填充；队名 slug（全小写、英文/拼音、连字符）。例：`contest2026_479_longxindui`。
-（仓库由组委会统一创建，**每队仅一个仓**，无需自行命名。）
+完整 AI 对话日志见 `logs/` 目录（按组委会要求的 `manifest.json` + `<日期>/<工具>__<会话id>.jsonl` 结构组织）。

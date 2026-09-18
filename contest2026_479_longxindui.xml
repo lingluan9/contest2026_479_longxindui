@@ -11,7 +11,8 @@
     nuttx:
         +arch/loongarch/
         +boards/loongarch/
-         	修改libs/libxx/libcxx/libcxx/src/atomic.cpp
+        +libs/libc/machine/loongarch/
+        libs/libxx/libcxx/libcxx/src/atomic.cpp
     
     apps:
     	+examples/ls_driver_test/
@@ -30,7 +31,9 @@
   </project>
   
   <remove-project name="nuttx" />
-  <project path="nuttx" name="nuttx" remote="my_github" revision="dev-ls" />
+  <project path="nuttx" name="nuttx" remote="my_github" revision="dev-ls" >
+  <linkfile src="tools/build.sh" dest="build.sh"/>
+  </project>
   
   <remove-project name="nuttx_libs_libxx_libcxx" />
   <project path="nuttx/libs/libxx/libcxx/libcxx" name="nuttx_libs_libxx_libcxx" remote="my_github" revision="dev-ls" />
