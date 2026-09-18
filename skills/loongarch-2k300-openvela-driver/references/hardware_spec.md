@@ -40,9 +40,9 @@
 
 | LED | GPIO 编号 | 电平驱动 | 说明 |
 |-----|----------|---------|------|
-| 红色 LED | GPIO72 | 高电平亮 | 可作 GPIO LED |
-| 绿色 LED | GPIO73 | 高电平亮 | 可作 GPIO LED |
-| 蓝色 LED | GPIO88 | 高电平亮 | ⚠️ 已分配给硬件 PWM2 |
+| 红色 LED | GPIO72 | 低电平亮 | 可作 GPIO LED |
+| 绿色 LED | GPIO73 | 低电平亮 | 可作 GPIO LED |
+| 蓝色 LED | GPIO88 | 低电平亮 | ⚠️ 已分配给硬件 PWM2 |
 
 > ⚠️ GPIO88 同时是蓝色 LED 和 PWM2 输出引脚。使用硬件 PWM 时，
 > 不能同时将 GPIO88 作为 GPIO LED 控制。
