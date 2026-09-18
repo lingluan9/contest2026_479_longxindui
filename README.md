@@ -6,12 +6,12 @@
 
 本作品涉及对 openvela **公共仓库**的改动（新增 LoongArch 架构支持等），按大赛规则 fork 后在各自仓库提交 PR。共改动 4 个公共仓库，fork 地址如下（均基于 `dev-ls` 分支开发）：
 
-| 公共仓库 | 本队 Fork 地址 | 主要改动 |
+| 公共仓库 | 本队 Fork 地址 |
 |---|---|---|
-| `nuttx` | https://github.com/lingluan9/nuttx | 新增 `arch/loongarch/`、`boards/loongarch/`、`libs/libc/machine/loongarch/` |
-| `nuttx-apps` | https://github.com/lingluan9/nuttx-apps | 新增 `examples/ls_driver_test/`、`system/ls2k0300_power/` |
-| `vendor` | https://github.com/lingluan9/vendor | 新增 `loongson/` 编译脚本 |
-| `nuttx_libs_libxx_libcxx` | https://github.com/lingluan9/nuttx_libs_libxx_libcxx | 修复 libcxx 原子操作 |
+| `nuttx` | https://github.com/lingluan9/nuttx |
+| `nuttx-apps` | https://github.com/lingluan9/nuttx-apps |
+| `vendor` | https://github.com/lingluan9/vendor |
+| `nuttx_libs_libxx_libcxx` | https://github.com/lingluan9/nuttx_libs_libxx_libcxx |
 
 各仓库的具体替换配置与改动清单见本仓 `contest2026_479_longxindui.xml`。
 
