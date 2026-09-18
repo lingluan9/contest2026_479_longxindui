@@ -7,7 +7,7 @@
 本作品涉及对 openvela **公共仓库**的改动（新增 LoongArch 架构支持等），按大赛规则 fork 后在各自仓库提交 PR。共改动 4 个公共仓库，fork 地址如下（均基于 `dev-ls` 分支开发）：
 
 | 公共仓库 | 本队 Fork 地址 |
-|---|---|---|
+|---|---|
 | `nuttx` | https://github.com/lingluan9/nuttx |
 | `nuttx-apps` | https://github.com/lingluan9/nuttx-apps |
 | `vendor` | https://github.com/lingluan9/vendor |
